@@ -15,7 +15,7 @@ const App = {
   },
 
   // Inicialização do App
-  init() {
+  async init() {
     this.initTheme();
     this.loadState();
     
@@ -27,6 +27,19 @@ const App = {
     this.bindEvents();
     this.initIntersectionObserver();
     this.updateLoyaltyNavButton();
+
+    // Carrega pratos do Supabase
+    const success = await this.fetchDishesFromSupabase();
+    if (!success) {
+      // Se falhar, usa os pratos salvos no localStorage (offline fallback)
+      const cachedDishes = localStorage.getItem('vk_dishes');
+      if (cachedDishes) {
+        this.state.dishes = JSON.parse(cachedDishes);
+      } else {
+        this.state.dishes = [...DEFAULT_DISHES];
+      }
+    }
+
     this.render();
     this.checkUrlForDish();
   },
@@ -951,8 +964,8 @@ const App = {
     document.getElementById('dish-crud-form').scrollIntoView({ behavior: 'smooth' });
   },
 
-  // Salva ou Adiciona um prato (CRUD)
-  saveDishCrud() {
+  // Salva ou Adiciona um prato (CRUD) com Supabase
+  async saveDishCrud() {
     const name = document.getElementById('crud-dish-name').value.trim();
     const price = parseFloat(document.getElementById('crud-dish-price').value);
     const category = document.getElementById('crud-dish-category').value;
@@ -968,6 +981,8 @@ const App = {
 
     const ingredients = ingInput ? ingInput.split(',').map(i => i.trim()).filter(i => i !== '') : [];
 
+    let dishData = null;
+
     if (this.state.editingDishId) {
       // MODO EDICAO
       const dish = this.state.dishes.find(d => d.id === this.state.editingDishId);
@@ -979,8 +994,8 @@ const App = {
         dish.description = description;
         dish.ingredients = ingredients;
         dish.tag = tag;
-
-        this.showToast('Prato atualizado com sucesso!', 'success');
+        
+        dishData = { ...dish };
       }
     } else {
       // MODO CRIAÇÃO NOVO PRATO
@@ -999,7 +1014,17 @@ const App = {
       };
 
       this.state.dishes.push(newDish);
-      this.showToast('Novo prato saboroso adicionado!', 'success');
+      dishData = newDish;
+    }
+
+    if (dishData) {
+      this.showToast('Salvando no Supabase...', 'success');
+      const success = await this.saveDishToSupabase(dishData);
+      if (success) {
+        this.showToast('Salvo com sucesso no Supabase! ☁️', 'success');
+      } else {
+        this.showToast('Prato atualizado localmente (erro Supabase).', 'error');
+      }
     }
 
     this.saveState();
@@ -1008,15 +1033,22 @@ const App = {
     this.render(); // Atualiza cardápio principal
   },
 
-  // Exclui um prato no CRUD
-  deleteDishCrud(id) {
+  // Exclui um prato no CRUD com Supabase
+  async deleteDishCrud(id) {
     if (confirm('Deseja realmente excluir este prato de forma definitiva?')) {
       this.state.dishes = this.state.dishes.filter(d => d.id !== id);
       // Remove comentários associados também
       this.state.comments = this.state.comments.filter(c => c.dishId !== id);
       
+      this.showToast('Removendo do Supabase...', 'success');
+      const success = await this.deleteDishFromSupabase(id);
+      if (success) {
+        this.showToast('Excluído do Supabase com sucesso! 🗑️', 'success');
+      } else {
+        this.showToast('Removido localmente (erro Supabase).', 'error');
+      }
+
       this.saveState();
-      this.showToast('Prato removido com sucesso.', 'success');
       this.renderAdminDishes();
       this.render();
       if (this.state.editingDishId === id) this.resetDishForm();
@@ -1330,5 +1362,79 @@ App.renderAdminCampaigns = function() {
   const container = document.getElementById('admin-campaigns-container');
   if (container && typeof CampaignSystem !== 'undefined') {
     container.innerHTML = CampaignSystem.renderAdminCampaigns(this.state.dishes, this.state.categories);
+  }
+};
+
+// ==========================================
+// INTEGRAÇÃO COM O BANCO DE DADOS SUPABASE
+// ==========================================
+
+App.supabaseUrl = 'https://xzmdgnvrhrvzjfltvaaf.supabase.co/rest/v1/dishes';
+App.supabaseHeaders = {
+  'apikey': 'sb_publishable_sA_TmqRuU-X-OrJq-QbUaQ_xml9UHoB',
+  'Authorization': 'Bearer sb_publishable_sA_TmqRuU-X-OrJq-QbUaQ_xml9UHoB',
+  'Content-Type': 'application/json'
+};
+
+App.fetchDishesFromSupabase = async function() {
+  try {
+    const response = await fetch(this.supabaseUrl + '?order=name.asc', {
+      method: 'GET',
+      headers: this.supabaseHeaders
+    });
+    if (response.ok) {
+      const dishes = await response.json();
+      if (dishes && dishes.length > 0) {
+        this.state.dishes = dishes.map(d => ({
+          ...d,
+          price: parseFloat(d.price),
+          ingredients: Array.isArray(d.ingredients) ? d.ingredients : []
+        }));
+        console.log('[Supabase] Pratos sincronizados com sucesso:', this.state.dishes.length);
+        return true;
+      }
+    }
+    return false;
+  } catch (e) {
+    console.error('[Supabase] Erro ao buscar pratos:', e);
+    return false;
+  }
+};
+
+App.saveDishToSupabase = async function(dish) {
+  try {
+    const response = await fetch(this.supabaseUrl, {
+      method: 'POST',
+      headers: {
+        ...this.supabaseHeaders,
+        'Prefer': 'resolution=merge-duplicates' // Faz Upsert (Merge) no PostgREST de Supabase
+      },
+      body: JSON.stringify(dish)
+    });
+    if (response.ok) {
+      console.log('[Supabase] Prato upsertado com sucesso:', dish.id);
+      return true;
+    }
+    return false;
+  } catch (e) {
+    console.error('[Supabase] Erro ao salvar prato no Supabase:', e);
+    return false;
+  }
+};
+
+App.deleteDishFromSupabase = async function(id) {
+  try {
+    const response = await fetch(this.supabaseUrl + '?id=eq.' + id, {
+      method: 'DELETE',
+      headers: this.supabaseHeaders
+    });
+    if (response.ok) {
+      console.log('[Supabase] Prato deletado com sucesso do Supabase:', id);
+      return true;
+    }
+    return false;
+  } catch (e) {
+    console.error('[Supabase] Erro ao deletar prato no Supabase:', e);
+    return false;
   }
 };
