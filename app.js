@@ -1419,29 +1419,50 @@ App.fetchDishesFromSupabase = async function() {
     });
     if (response.ok) {
       const dishes = await response.json();
+      
+      console.log(`[Supabase] QUANTIDADE DE PRATOS RETORNADOS: ${dishes ? dishes.length : 0}`);
+      
       if (dishes && dishes.length > 0) {
-        this.state.dishes = dishes.map(d => ({
-          ...d,
-          price: parseFloat(d.price),
-          ingredients: Array.isArray(d.ingredients) ? d.ingredients : [],
-          reviewsCount: d.reviewscount !== undefined ? parseInt(d.reviewscount) : parseInt(d.reviewsCount || 0)
-        }));
-        
+        // 1. Logar os primeiros 5 itens completos
+        console.log('[Supabase] Primeiros 5 pratos recebidos:', JSON.stringify(dishes.slice(0, 5), null, 2));
+
+        // 2. Logar todos os IDs carregados
+        const allIds = dishes.map(d => d.id || d.ID || d.Id || 'SEM_ID');
+        console.log('[Supabase] Todos os IDs carregados:', allIds);
+
+        // 3. Mapear e garantir preservação dos campos no objeto final
+        this.state.dishes = dishes.map(d => {
+          const preservedId = d.id || d.ID || d.Id || '';
+          return {
+            ...d,
+            id: preservedId, // Garante que o ID original seja preservado
+            price: parseFloat(d.price !== undefined ? d.price : (d.Price !== undefined ? d.Price : 0)),
+            ingredients: Array.isArray(d.ingredients) ? d.ingredients : [],
+            reviewsCount: d.reviewscount !== undefined ? parseInt(d.reviewscount) : parseInt(d.reviewsCount || 0)
+          };
+        });
+
         console.log(`Pratos recebidos do Supabase: ${this.state.dishes.length}`);
         
+        // 4. Garantir busca estrita por "agua_coco"
         const agua = this.state.dishes.find(d => d.id === 'agua_coco');
         if (agua) {
+          App.supabaseAguaPrice = agua.price;
           console.log(`Preço agua_coco recebido: ${agua.price}`);
         } else {
+          App.supabaseAguaPrice = undefined;
           console.log("Preço agua_coco recebido: não encontrado");
         }
         
+        App.source = 'Supabase';
         return true;
       }
     }
+    App.source = 'data.js (Fallback)';
     return false;
   } catch (e) {
     console.error('[Supabase] Erro ao buscar pratos:', e);
+    App.source = 'data.js (Fallback)';
     return false;
   }
 };
@@ -1462,11 +1483,17 @@ App.saveDishToSupabase = async function(dish, isEdit) {
       reviewscount: parseInt(dish.reviewsCount || 0)
     };
 
-    console.log(`Atualizando prato id: ${payload.id}`);
-    console.log('Payload:', { price: payload.price });
-
     const url = isEdit ? `${this.supabaseUrl}?id=eq.${payload.id}` : this.supabaseUrl;
     const method = isEdit ? 'PATCH' : 'POST';
+
+    // DIAGNÓSTICO INTENSIVO DE REQUISIÇÃO (Requisitado pelo usuário)
+    console.log("---------------- SUPABASE REQUISITION DIAGNOSTIC ----------------");
+    console.log(`URL completa da requisição: ${url}`);
+    console.log(`Método HTTP: ${method}`);
+    console.log(`Query string completa: ${url.includes('?') ? url.substring(url.indexOf('?')) : 'Nenhuma'}`);
+    console.log("Headers enviados:", JSON.stringify(this.supabaseHeaders, null, 2));
+    console.log("Payload enviado:", JSON.stringify(payload, null, 2));
+    console.log("-----------------------------------------------------------------");
 
     // Executa a escrita no Supabase (PATCH/POST) sem Prefer: return=representation para evitar restrições RLS
     const response = await fetch(url, {
@@ -1474,6 +1501,12 @@ App.saveDishToSupabase = async function(dish, isEdit) {
       headers: this.supabaseHeaders,
       body: JSON.stringify(payload)
     });
+
+    console.log("---------------- SUPABASE RESPONSE DIAGNOSTIC ----------------");
+    console.log(`Status HTTP: ${response.status} ${response.statusText}`);
+    const bodyText = await response.text();
+    console.log(`Body retornado: ${bodyText || 'Vazio (Sem conteúdo)'}`);
+    console.log("--------------------------------------------------------------");
 
     if (response.ok) {
       // Faz um SELECT de confirmação na tabela dishes para ler a linha atualizada da nuvem
@@ -1485,10 +1518,15 @@ App.saveDishToSupabase = async function(dish, isEdit) {
       if (selectResponse.ok) {
         const selectData = await selectResponse.json();
         const rowsUpdated = Array.isArray(selectData) ? selectData.length : 0;
+        
+        console.log(`Atualizando prato id: ${payload.id}`);
+        console.log('Payload:', { price: payload.price });
         console.log(`Linhas atualizadas: ${rowsUpdated}`);
 
         if (rowsUpdated === 0) {
-          console.error(`[Supabase] ERRO: 0 linhas foram atualizadas para o prato id: ${payload.id}. Verifique se o ID existe.`);
+          console.error(`[Supabase] ERRO CRÍTICO: 0 linhas foram atualizadas. O prato com ID '${payload.id}' existe no banco, mas o PATCH retornou 0 linhas modificadas.`);
+          console.error(`[Supabase] CAUSA PROVÁVEL: Políticas de Row Level Security (RLS) no Supabase bloqueando a role 'anon' para escritas (UPDATE/INSERT).`);
+          console.error(`[Supabase] AÇÃO: Certifique-se de que a política RLS ativa para UPDATE/INSERT permita a role 'anon' de alterar registros.`);
           return false;
         }
 
@@ -1502,8 +1540,7 @@ App.saveDishToSupabase = async function(dish, isEdit) {
         return false;
       }
     } else {
-      const errorText = await response.text();
-      console.error(`[Supabase] Erro ao salvar prato (Status ${response.status} - ${response.statusText}):`, errorText);
+      console.error(`[Supabase] Erro ao salvar prato (Status ${response.status}):`, bodyText);
       return false;
     }
   } catch (e) {
