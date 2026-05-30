@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Cardápio Digital | VK Restaurante</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Explore o cardápio digital do VK Restaurante. Sabores nordestinos autênticos com o melhor executivo de feijoada, galeto completo na brasa, cupim lento e muito mais!">
+  <meta name="keywords" content="VK Restaurante, Cardápio Digital, Comida Nordestina, Feijoada, Galeto na Brasa, Cupim, Restaurante Pernambuco, QR Code Mesa">
+  <meta name="author" content="VK Restaurante">
+  
+  <!-- Open Graph / Facebook / WhatsApp Preview -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Cardápio Digital | VK Restaurante">
+  <meta property="og:description" content="Eita cumadi e cumpadi! Venha se deliciar com as fotos e pratos do VK Restaurante. Acesse nosso cardápio online agora!">
+  <meta property="og:image" content="assets/vk_banner_hero.png">
+  <meta property="og:url" content="https://vkrestaurante.com.br">
+  
+  <!-- Twitter Preview -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Cardápio Digital | VK Restaurante">
+  <meta name="twitter:description" content="O melhor da gastronomia regional com sabor de comida de vó. Explore nosso cardápio digital!">
+  <meta name="twitter:image" content="assets/vk_banner_hero.png">
+
+  <!-- Favicon Mock -->
+  <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌵</text></svg>">
+
+  <!-- Link de Estilos -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div id="app">
+    
+    <!-- Cabeçalho (Header Sticky) -->
+    <header class="app-header">
+      <div class="header-container">
+        <a href="#" class="header-logo">
+          <div class="logo-icon">
+            <img src="assets/logo_vk.png" alt="VK Restaurante Logo" style="width: 36px; height: 36px; object-fit: contain;">
+          </div>
+          <h1 class="logo-text">VK <span>Restaurante</span></h1>
+        </a>
+        <div class="header-actions">
+          <button id="btn-admin-nav" class="btn-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span>Admin</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Banner Hero & Boas-Vindas -->
+    <section class="hero-section">
+      <div id="hero-banner" class="hero-banner"></div>
+      <div class="hero-content">
+        <div class="welcome-card woodcut-border-double">
+          <div class="welcome-grid">
+            <div class="welcome-text">
+              <h1>Sejam <span>bem-vindos!</span></h1>
+              <p>Cumadi e cumpadi, tá pronto para dar uma passeada em nosso cardápio? Aqui foi tudo pensado e preparado com aquele gostinho que só o Nordeste tem.</p>
+              <p><strong>Pra começo de prosa...</strong> Vamos iniciar com uma cozinha regional com opções tradicionais, inovadoras e repletas of sabor. Uma experiência de qualidade com gostinho de comida de vó!</p>
+            </div>
+            
+            <!-- Desenho Cordel Decorativo Lateral -->
+            <div class="welcome-cordel-graphic">
+              <img src="assets/logo_vk.png" alt="VK Restaurante" style="width: 100%; max-width: 150px; height: auto; filter: drop-shadow(0 0 10px rgba(229, 169, 26, 0.3));">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção de Destaques e Campanhas (Cardápio Vivo) -->
+    <div id="highlights-container"></div>
+
+    <!-- Seção de Ranking de Mais Pedidos -->
+    <div id="ranking-container"></div>
+
+    <!-- Navegação por Categorias Fixo ao Rolar -->
+    <nav class="categories-nav">
+      <div id="categories-container" class="categories-container">
+        <!-- Inserido dinamicamente via JS -->
+      </div>
+    </nav>
+
+    <!-- Menu Grid de Pratos -->
+    <main class="menu-section">
+      <h2 class="section-title">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px; color: var(--color-gold);">
+          <path d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm1 12h-2v6h2v-6zm0-4h-2v2h2v-2z"/>
+        </svg>
+        Nossas Delícias
+      </h2>
+      
+      <div id="dishes-grid" class="dishes-grid">
+        <!-- Inserido dinamicamente via JS -->
+      </div>
+    </main>
+
+    <!-- Divisor Cordel -->
+    <div class="woodcut-divider">
+      <span class="woodcut-divider-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2v20M8 8a4 4 0 0 1 4 4M16 6a4 4 0 0 0-4 4M7 16h10" />
+        </svg>
+      </span>
+    </div>
+
+    <!-- Rodapé Social Dinâmico / Utility Bar -->
+    <div class="quick-actions-bar">
+      <div class="quick-actions-tray">
+        <a href="https://api.whatsapp.com/send?phone=558198069998&text=Ol%C3%A1!%20Estou%20na%20mesa%20do%20VK%20Restaurante%20e%20gostaria%20de%20chamar%20o%20gar%C3%A7om." target="_blank" class="action-btn">
+          <span class="action-btn-icon">💬</span>
+          <span class="action-btn-label">Chamar Garçom</span>
+        </a>
+        <a href="https://maps.google.com/?q=Av.+Bernardo+Vieira+de+Melo,+1730+-+Piedade,+Jaboat%C3%A3o+dos+Guararapes+-+PE,+54410-010" target="_blank" class="action-btn">
+          <span class="action-btn-icon">📍</span>
+          <span class="action-btn-label">Onde Estamos</span>
+        </a>
+        
+        <!-- Botão do Programa de Fidelidade / Perfil -->
+        <button id="btn-loyalty-nav" class="action-btn" aria-label="Fidelidade">
+          <span class="action-btn-icon">👤</span>
+          <span class="action-btn-label" id="loyalty-nav-label">Meu Perfil</span>
+        </button>
+
+        <a href="https://instagram.com/vkrestaurante" target="_blank" class="action-btn">
+          <span class="action-btn-icon">📸</span>
+          <span class="action-btn-label">Instagram</span>
+        </a>
+        <!-- Botão Flutuante de Tema (Escuro/Claro) -->
+        <button id="theme-toggle" class="action-btn theme-toggle-bar" aria-label="Alternar tema">
+          <span class="action-btn-icon">
+            <span class="icon-moon">🌙</span>
+            <span class="icon-sun">☀️</span>
+          </span>
+          <span class="action-btn-label">Tema</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Toast de Notificações Flutuante -->
+    <div id="toast" class="notification-toast">
+      <!-- Mensagem via JS -->
+    </div>
+
+    <!-- ==========================================
+         MODAIS (DETALHES / LOGIN / ADMIN)
+         ========================================== -->
+
+    <!-- 1. MODAL DETALHES DO PRATO (SLIDE UP) -->
+    <div id="detail-modal-overlay" class="modal-overlay">
+      <div class="modal-container">
+        <div class="modal-close-bar" id="detail-modal-close-bar">
+          <div class="modal-close-indicator"></div>
+        </div>
+        <button id="detail-modal-close" class="btn-modal-close" aria-label="Fechar">&times;</button>
+        
+        <div id="detail-modal-img-container" class="detail-img-container">
+          <!-- Imagem dinamicamente pelo JS -->
+        </div>
+
+        <div class="detail-body">
+          <div id="detail-badge-row" class="detail-badge-row"></div>
+          
+          <div class="detail-header-row">
+            <h2 id="detail-title" class="detail-title">Nome do Prato</h2>
+            <div class="detail-price"><span>R$</span><span id="detail-price-val">00,00</span></div>
+          </div>
+
+          <div class="detail-rating-row">
+            <div id="detail-stars-stars" class="detail-stars">★★★★★</div>
+            <span id="detail-rating-text" class="detail-rating-text">5.0 (0 comentários)</span>
+          </div>
+
+          <p id="detail-description" class="detail-description">Descrição completa do prato.</p>
+
+          <!-- Ingredientes -->
+          <h3 class="detail-section-title">✨ Ingredientes Principais</h3>
+          <div id="ingredients-list" class="ingredients-list">
+            <!-- Inserido dinamicamente -->
+          </div>
+
+          <!-- Pedido Direto via WhatsApp -->
+          <div class="order-section" style="margin: 1.5rem 0; text-align: center;">
+            <a href="#" id="btn-order-whats" target="_blank" class="btn-submit" style="
+              display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+              width: 100%; text-decoration: none; font-weight: 700; font-size: 1.05rem; padding: 0.95rem;
+              background: #25d366; color: #fff; border-radius: 12px; border: none;
+              box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2); transition: all 0.2s;
+            ">
+              <span>📲 Fazer Pedido via WhatsApp</span>
+            </a>
+          </div>
+
+          <!-- Compartilhamento -->
+          <div class="share-section">
+            <h4 class="share-title">Gostou? Compartilhe com os amigos!</h4>
+            <div class="share-buttons">
+              <a href="#" id="btn-share-whats" target="_blank" class="btn-share whatsapp">
+                <span>WhatsApp</span>
+              </a>
+              <button id="btn-share-insta" class="btn-share instagram">
+                <span>Instagram</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Comentários/Elogios dos Clientes -->
+          <div class="reviews-section">
+            <h3 class="detail-section-title">💬 Elogios de quem já provou</h3>
+            
+            <div id="reviews-list" class="reviews-list">
+              <!-- Comentários dinâmicos aprovados -->
+            </div>
+
+            <!-- Formulário para Comentar (Pendente de Aprovação) -->
+            <form id="comment-form" class="comment-form">
+              <h4 class="form-title">Deixe seu elogio para o prato</h4>
+              <input type="hidden" id="comment-dish-id">
+              
+              <div class="form-group">
+                <label class="form-label" for="comment-name">Seu Nome</label>
+                <input type="text" id="comment-name" class="form-input" placeholder="Ex: Severino da Silva" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Sua Avaliação</label>
+                <div id="star-select-container" class="star-rating-select">
+                  <span data-val="1" class="selected">★</span>
+                  <span data-val="2" class="selected">★</span>
+                  <span data-val="3" class="selected">★</span>
+                  <span data-val="4" class="selected">★</span>
+                  <span data-val="5" class="selected">★</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="comment-text">Mensagem / Elogio</label>
+                <textarea id="comment-text" class="form-input" rows="3" placeholder="O que achou do tempero, da apresentação e do sabor?" style="resize: none;" required></textarea>
+              </div>
+
+              <button type="submit" class="btn-submit">
+                <span>Enviar Elogio</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. MODAL DE FIDELIDADE (LOGIN / PERFIL) -->
+    <div id="loyalty-modal-overlay" class="modal-overlay">
+      <div class="modal-container">
+        <button id="loyalty-modal-close" class="btn-modal-close" aria-label="Fechar">&times;</button>
+        <div id="loyalty-modal-content">
+          <!-- Inserido dinamicamente pelo loyalty.js -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. MODAL ADMINISTRATIVO (CRUD / MODERAÇÃO) -->
+    <div id="admin-modal-overlay" class="modal-overlay">
+      <div class="modal-container modal-admin">
+        <button id="admin-modal-close" class="btn-modal-close" aria-label="Fechar">&times;</button>
+        
+        <!-- FLUXO A: TELA DE LOGIN ADMIN -->
+        <div id="admin-login-section" class="login-container" style="display: block;">
+          <div class="login-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin: 0 auto;">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <h2 class="login-title">Acesso Restrito</h2>
+          <p class="login-subtitle">Área de Administração do VK Restaurante</p>
+          
+          <form id="admin-login-form">
+            <div class="form-group" style="text-align: left;">
+              <label class="form-label" for="admin-password">Senha de Administrador</label>
+              <input type="password" id="admin-password" class="form-input" placeholder="Digite a senha..." required autocomplete="current-password">
+              <span style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px; display:block;">Dica: Use <strong>admin123</strong> para testar a moderação!</span>
+            </div>
+            
+            <button type="submit" class="btn-submit" style="margin-top: 1.5rem;">
+              <span>Entrar no Painel</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- FLUXO B: DASHBOARD ADMINISTRATIVO COMPLETO -->
+        <div id="admin-dashboard-section" class="admin-dashboard" style="display: none;">
+          
+          <!-- Cabeçalho Dashboard -->
+          <div class="admin-header">
+            <div class="admin-title-row">
+              <span class="admin-logo">VK <span>Admin</span></span>
+              <span class="badge-admin">Mesa Control</span>
+            </div>
+            <button id="btn-admin-logout" class="btn-logout">Sair do Painel</button>
+          </div>
+
+          <!-- Abas de Navegação -->
+          <div id="admin-tabs-nav" class="admin-tabs">
+            <button class="admin-tab active" data-tab="comentarios">
+              Comentários 
+              <span id="mod-pending-badge" style="background:var(--color-error); color:#fff; font-size:0.65rem; padding:1px 6px; border-radius:10px; margin-left:4px;">0 pendentes</span>
+            </button>
+            <button class="admin-tab" data-tab="pratos">Gerenciar Cardápio</button>
+            <button class="admin-tab" data-tab="categorias">Categorias</button>
+            <button class="admin-tab" data-tab="estatisticas">📊 Estatísticas</button>
+            <button class="admin-tab" data-tab="fidelidade">🏆 Fidelidade</button>
+            <button class="admin-tab" data-tab="campaigns">📢 Cardápio Vivo</button>
+          </div>
+
+          <!-- CONTEÚDO 1: ABA DE COMENTÁRIOS (MODERAÇÃO) -->
+          <div id="admin-tab-comentarios" class="admin-tab-content active">
+            <div class="admin-panel-card">
+              <div class="panel-header">
+                <h3 class="panel-title">Moderador de Comentários</h3>
+                <span style="font-size: 0.8rem; color: var(--text-secondary);">Aprove ou recuse os elogios dos clientes</span>
+              </div>
+              <div id="moderation-list" class="moderation-list">
+                <!-- Lista de comentários para moderar dinamicamente -->
+              </div>
+            </div>
+          </div>
+
+          <!-- CONTEÚDO 2: ABA DE PRATOS (CRUD) -->
+          <div id="admin-tab-pratos" class="admin-tab-content">
+            <div class="admin-split-grid">
+              
+              <!-- Esquerda: Lista de pratos existentes -->
+              <div class="admin-panel-card">
+                <div class="panel-header">
+                  <h3 class="panel-title">Pratos Cadastrados</h3>
+                </div>
+                <div id="admin-dishes-list" class="admin-items-list">
+                  <!-- Lista dinamicamente pelo JS -->
+                </div>
+              </div>
+
+              <!-- Direita: Formulário de Cadastro / Edição -->
+              <div class="admin-panel-card">
+                <div class="panel-header">
+                  <h3 id="panel-crud-title" class="panel-title">Adicionar Prato</h3>
+                </div>
+                
+                <form id="dish-crud-form">
+                  <div class="form-grid-2">
+                    <div class="form-group">
+                      <label class="form-label" for="crud-dish-name">Nome do Prato *</label>
+                      <input type="text" id="crud-dish-name" class="form-input" placeholder="Ex: Escondidinho de Carne Seca" required>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="crud-dish-price">Preço (R$) *</label>
+                      <input type="number" id="crud-dish-price" class="form-input" step="0.01" min="0" placeholder="Ex: 29.90" required>
+                    </div>
+                  </div>
+
+                  <div class="form-grid-2">
+                    <div class="form-group">
+                      <label class="form-label" for="crud-dish-category">Categoria *</label>
+                      <select id="crud-dish-category" class="form-input" required>
+                        <!-- Dinamicamente via JS -->
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="crud-dish-image">Caminho da Foto (Foto Real)</label>
+                      <input type="text" id="crud-dish-image" class="form-input" placeholder="Ex: assets/executivo_feijoada.png">
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="crud-dish-desc">Descrição / Apresentação *</label>
+                    <textarea id="crud-dish-desc" class="form-input" rows="2" placeholder="Descreva os sabores, guarnições e apresentação do prato..." required></textarea>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="crud-dish-ingredients">Ingredientes Principais (Separados por vírgula)</label>
+                    <input type="text" id="crud-dish-ingredients" class="form-input" placeholder="Ex: Carne de Sol, Queijo Coalho, Macaxeira Frita">
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="crud-dish-tag">Selo / Tag de Destaque</label>
+                    <select id="crud-dish-tag" class="form-input">
+                      <option value="">Nenhum</option>
+                      <option value="prato-do-dia">Prato do Dia 🌟</option>
+                      <option value="mais-pedido">Mais Pedido 🔥</option>
+                      <option value="promocao">Promoção 🏷️</option>
+                      <option value="destaque">Destaque Especial ⭐</option>
+                    </select>
+                  </div>
+
+                  <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+                    <button type="button" id="btn-cancel-dish-edit" class="btn-submit" style="background:var(--bg-primary); border: 1px solid var(--border-color); color:var(--text-primary); display:none;">
+                      <span>Cancelar</span>
+                    </button>
+                    <button type="submit" class="btn-submit">
+                      <span>Salvar Alterações</span>
+                    </button>
+                  </div>
+                </form>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- CONTEÚDO 3: ABA DE CATEGORIAS (CRUD) -->
+          <div id="admin-tab-categorias" class="admin-tab-content">
+            <div class="admin-split-grid" style="grid-template-columns: 1fr;">
+              <div class="admin-panel-card" style="max-width: 500px; margin: 0 auto; width: 100%;">
+                <div class="panel-header">
+                  <h3 class="panel-title">Gerenciar Categorias</h3>
+                </div>
+
+                <form id="cat-crud-form">
+                  <div class="form-group">
+                    <label class="form-label" for="crud-cat-name">Nome da Categoria *</label>
+                    <input type="text" id="crud-cat-name" class="form-input" placeholder="Ex: Petiscos 🍢" required>
+                  </div>
+                  <button type="submit" class="btn-submit" style="margin-top: 1rem;">
+                    <span>Adicionar Categoria</span>
+                  </button>
+                </form>
+
+                <div id="admin-categories-list" class="admin-cats-list">
+                  <!-- Lista dinamicamente pelo JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CONTEÚDO 4: ABA DE ESTATÍSTICAS (RANKING) -->
+          <div id="admin-tab-estatisticas" class="admin-tab-content">
+            <div class="admin-panel-card">
+              <div id="admin-stats-container">
+                <!-- Renderizado via ranking.js -->
+              </div>
+            </div>
+          </div>
+
+          <!-- CONTEÚDO 5: ABA DE FIDELIDADE (DASHBOARD/CRUD) -->
+          <div id="admin-tab-fidelidade" class="admin-tab-content">
+            <div class="admin-panel-card">
+              <div id="loyalty-admin-content">
+                <!-- Renderizado via loyalty.js -->
+              </div>
+            </div>
+          </div>
+
+          <!-- CONTEÚDO 6: ABA DE CARDÁPIO VIVO (CAMPANHAS) -->
+          <div id="admin-tab-campaigns" class="admin-tab-content">
+            <div class="admin-panel-card">
+              <div id="admin-campaigns-container">
+                <!-- Renderizado via campaigns.js -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="data.js"></script>
+  <script src="ranking.js"></script>
+  <script src="loyalty.js"></script>
+  <script src="campaigns.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
