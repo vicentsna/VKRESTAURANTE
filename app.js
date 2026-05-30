@@ -1487,64 +1487,61 @@ App.saveDishToSupabase = async function(dish, isEdit) {
     const method = isEdit ? 'PATCH' : 'POST';
 
     // DIAGNÓSTICO INTENSIVO DE REQUISIÇÃO (Requisitado pelo usuário)
-    console.log("---------------- SUPABASE REQUISITION DIAGNOSTIC ----------------");
-    console.log(`URL completa da requisição: ${url}`);
-    console.log(`Método HTTP: ${method}`);
-    console.log(`Query string completa: ${url.includes('?') ? url.substring(url.indexOf('?')) : 'Nenhuma'}`);
-    console.log("Headers enviados:", JSON.stringify(this.supabaseHeaders, null, 2));
+    console.log("---------------- SUPABASE SAVE DIAGNOSTICS ----------------");
+    console.log(`ID enviado: ${payload.id}`);
     console.log("Payload enviado:", JSON.stringify(payload, null, 2));
-    console.log("-----------------------------------------------------------------");
+    console.log(`URL completa da requisição PATCH: ${url}`);
+    console.log(`Método HTTP: ${method}`);
+    console.log("Headers enviados:", JSON.stringify({
+      ...this.supabaseHeaders,
+      'Prefer': 'return=representation'
+    }, null, 2));
+    console.log("-----------------------------------------------------------");
 
-    // Executa a escrita no Supabase (PATCH/POST) sem Prefer: return=representation para evitar restrições RLS
+    // Executa a escrita no Supabase (PATCH/POST) exigindo retorno da representação
     const response = await fetch(url, {
       method: method,
-      headers: this.supabaseHeaders,
+      headers: {
+        ...this.supabaseHeaders,
+        'Prefer': 'return=representation' // Retorna a linha que foi efetivamente modificada
+      },
       body: JSON.stringify(payload)
     });
 
     console.log("---------------- SUPABASE RESPONSE DIAGNOSTIC ----------------");
-    console.log(`Status HTTP: ${response.status} ${response.statusText}`);
-    const bodyText = await response.text();
-    console.log(`Body retornado: ${bodyText || 'Vazio (Sem conteúdo)'}`);
-    console.log("--------------------------------------------------------------");
-
+    console.log(`Status HTTP retornado: ${response.status} ${response.statusText}`);
+    
     if (response.ok) {
-      // Faz um SELECT de confirmação na tabela dishes para ler a linha atualizada da nuvem
-      const selectResponse = await fetch(`${this.supabaseUrl}?id=eq.${payload.id}`, {
-        method: 'GET',
-        headers: this.supabaseHeaders
-      });
+      const data = await response.json();
+      console.log("Body retornado pelo Supabase:", JSON.stringify(data, null, 2));
+      
+      const rowsUpdated = Array.isArray(data) ? data.length : 0;
+      console.log(`Quantidade de linhas atualizadas: ${rowsUpdated}`);
+      
+      // Log clássico solicitado pelo usuário
+      console.log(`Atualizando prato id: ${payload.id}`);
+      console.log('Payload:', { price: payload.price });
+      console.log(`Linhas atualizadas: ${rowsUpdated}`);
+      console.log("--------------------------------------------------------------");
 
-      if (selectResponse.ok) {
-        const selectData = await selectResponse.json();
-        const rowsUpdated = Array.isArray(selectData) ? selectData.length : 0;
-        
-        console.log(`Atualizando prato id: ${payload.id}`);
-        console.log('Payload:', { price: payload.price });
-        console.log(`Linhas atualizadas: ${rowsUpdated}`);
-
-        if (rowsUpdated === 0) {
-          console.error(`[Supabase] ERRO CRÍTICO: 0 linhas foram atualizadas. O prato com ID '${payload.id}' existe no banco, mas o PATCH retornou 0 linhas modificadas.`);
-          console.error(`[Supabase] CAUSA PROVÁVEL: Políticas de Row Level Security (RLS) no Supabase bloqueando a role 'anon' para escritas (UPDATE/INSERT).`);
-          console.error(`[Supabase] AÇÃO: Certifique-se de que a política RLS ativa para UPDATE/INSERT permita a role 'anon' de alterar registros.`);
-          return false;
-        }
-
-        const updatedDish = selectData[0];
-        console.log(`Preço agua_coco recebido: ${updatedDish.price}`);
-
-        console.log(`[Supabase] Prato salvo e verificado com sucesso (${method}):`, payload.id);
-        return true;
-      } else {
-        console.error('[Supabase] Falha ao fazer SELECT de confirmação após salvar.');
+      if (rowsUpdated === 0) {
+        console.error(`[Supabase] ERRO CRÍTICO: 0 linhas foram atualizadas. O prato com ID '${payload.id}' existe no banco, mas a alteração foi impedida.`);
+        console.error(`[Supabase] CAUSA PROVÁVEL: Políticas de Row Level Security (RLS) no Supabase bloqueando a role 'anon' para escritas (UPDATE/INSERT).`);
+        console.error(`[Supabase] AÇÃO: No editor SQL do Supabase, certifique-se de que a política RLS ativa permita UPDATE na tabela dishes para a role anon (ou desative RLS temporariamente para testes).`);
         return false;
       }
+
+      console.log(`[Supabase] Prato salvo com sucesso (${method}):`, payload.id);
+      return true;
     } else {
-      console.error(`[Supabase] Erro ao salvar prato (Status ${response.status}):`, bodyText);
+      const bodyText = await response.text();
+      console.error("Body retornado pelo Supabase (Erro):", bodyText);
+      console.log("--------------------------------------------------------------");
       return false;
     }
   } catch (e) {
     console.error('[Supabase] Erro de rede/exceção ao salvar prato:', e);
+    console.log("--------------------------------------------------------------");
     return false;
   }
 };
