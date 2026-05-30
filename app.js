@@ -314,6 +314,36 @@ const App = {
     const grid = document.getElementById('dishes-grid');
     grid.innerHTML = '';
 
+    // Logs detalhados solicitados para fins de auditoria
+    const source = App.source || 'Supabase';
+    console.log(`Fonte dos pratos: ${source}`);
+    console.log(`Pratos carregados: ${this.state.dishes.length}`);
+    console.log(`Preço agua_coco vindo do Supabase: ${App.supabaseAguaPrice || 'Não carregado/indisponível'}`);
+
+    const cached = localStorage.getItem('vk_dishes');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        const cachedAgua = parsed.find(d => d.id === 'agua_coco');
+        if (cachedAgua) {
+          console.log(`Preço agua_coco vindo do localStorage: ${cachedAgua.price}`);
+        }
+      } catch (e) {}
+    } else {
+      console.log('Preço agua_coco vindo do localStorage: não existe');
+    }
+
+    if (typeof DEFAULT_DISHES !== 'undefined') {
+      const defaultAgua = DEFAULT_DISHES.find(d => d.id === 'agua_coco');
+      if (defaultAgua) {
+        console.log(`Preço agua_coco vindo do data.js: ${defaultAgua.price}`);
+      }
+    }
+
+    const currentAgua = this.state.dishes.find(d => d.id === 'agua_coco');
+    const renderedPrice = currentAgua ? currentAgua.price : 'não encontrado';
+    console.log(`Preço agua_coco renderizado: ${renderedPrice}`);
+
     let filtered = [];
     if (this.state.activeCategory === 'destaques') {
       // Exibe pratos com selo mais-pedido, prato-do-dia ou destaque
