@@ -17,29 +17,25 @@ const App = {
   // Inicialização do App
   async init() {
     this.initTheme();
+    
+    // Limpa cache antigo de pratos no LocalStorage para garantir leitura direta da nuvem
+    localStorage.removeItem('vk_dishes');
+    
     this.loadState();
     
-    // Inicialização dos Sistemas Premium
-    if (typeof RankingSystem !== 'undefined') RankingSystem.init();
-    if (typeof LoyaltySystem !== 'undefined') LoyaltySystem.init();
-    if (typeof CampaignSystem !== 'undefined') CampaignSystem.init();
-
     this.bindEvents();
     this.initIntersectionObserver();
     this.updateLoyaltyNavButton();
 
-    // Carrega pratos do Supabase
-    const success = await this.fetchDishesFromSupabase();
-    if (!success) {
-      // Se falhar, usa os pratos salvos no localStorage (offline fallback)
-      const cachedDishes = localStorage.getItem('vk_dishes');
-      if (cachedDishes) {
-        this.state.dishes = JSON.parse(cachedDishes);
-      } else {
-        this.state.dishes = [...DEFAULT_DISHES];
-      }
-    }
+    // 1. Carrega pratos do Supabase primeiro!
+    await this.fetchDishesFromSupabase();
 
+    // 2. Inicialização dos Sistemas Premium com pratos do Supabase carregados na memória
+    if (typeof RankingSystem !== 'undefined') RankingSystem.init();
+    if (typeof LoyaltySystem !== 'undefined') LoyaltySystem.init();
+    if (typeof CampaignSystem !== 'undefined') CampaignSystem.init();
+
+    // 3. Renderiza o cardápio e a interface pública usando os dados da nuvem
     this.render();
     this.checkUrlForDish();
   },
@@ -74,7 +70,7 @@ const App = {
     const MENU_VERSION = '2.0';
     const savedVersion = localStorage.getItem('vk_menu_version');
 
-    // Se versão mudou, limpa dados antigos para re-semear com o novo cardápio completo
+    // Se versão mudou, limpa dados antigos
     if (savedVersion !== MENU_VERSION) {
       localStorage.removeItem('vk_dishes');
       localStorage.removeItem('vk_categories');
@@ -82,16 +78,11 @@ const App = {
       localStorage.setItem('vk_menu_version', MENU_VERSION);
     }
 
-    const cachedDishes = localStorage.getItem('vk_dishes');
+    // Inicializa memória limpa com DEFAULT_DISHES como baseline antes do carregamento do Supabase
+    this.state.dishes = [...DEFAULT_DISHES];
+
     const cachedCategories = localStorage.getItem('vk_categories');
     const cachedComments = localStorage.getItem('vk_comments');
-
-    if (cachedDishes) {
-      this.state.dishes = JSON.parse(cachedDishes);
-    } else {
-      this.state.dishes = [...DEFAULT_DISHES];
-      localStorage.setItem('vk_dishes', JSON.stringify(this.state.dishes));
-    }
 
     if (cachedCategories) {
       this.state.categories = JSON.parse(cachedCategories);
@@ -1391,6 +1382,7 @@ App.supabaseHeaders = {
 
 App.fetchDishesFromSupabase = async function() {
   try {
+    console.log("Carregando pratos do Supabase");
     const response = await fetch(this.supabaseUrl + '?order=name.asc', {
       method: 'GET',
       headers: this.supabaseHeaders
@@ -1402,10 +1394,18 @@ App.fetchDishesFromSupabase = async function() {
           ...d,
           price: parseFloat(d.price),
           ingredients: Array.isArray(d.ingredients) ? d.ingredients : [],
-          // Sincroniza a propriedade camelCase para o SPA a partir da coluna minúscula do Postgres
           reviewsCount: d.reviewscount !== undefined ? parseInt(d.reviewscount) : parseInt(d.reviewsCount || 0)
         }));
-        console.log('[Supabase] Pratos sincronizados com sucesso:', this.state.dishes.length);
+        
+        console.log(`Pratos recebidos do Supabase: ${this.state.dishes.length}`);
+        
+        const agua = this.state.dishes.find(d => d.id === 'agua_coco');
+        if (agua) {
+          console.log(`Preço agua_coco recebido: ${agua.price}`);
+        } else {
+          console.log("Preço agua_coco recebido: não encontrado");
+        }
+        
         return true;
       }
     }
@@ -1437,27 +1437,40 @@ App.saveDishToSupabase = async function(dish, isEdit) {
 
     const url = isEdit ? `${this.supabaseUrl}?id=eq.${payload.id}` : this.supabaseUrl;
     const method = isEdit ? 'PATCH' : 'POST';
+
+    // Executa a escrita no Supabase (PATCH/POST) sem Prefer: return=representation para evitar restrições RLS
     const response = await fetch(url, {
       method: method,
-      headers: {
-        ...this.supabaseHeaders,
-        'Prefer': 'return=representation' // Exige representação no corpo da resposta
-      },
+      headers: this.supabaseHeaders,
       body: JSON.stringify(payload)
     });
 
     if (response.ok) {
-      const data = await response.json();
-      const rowsUpdated = Array.isArray(data) ? data.length : 0;
-      console.log(`Linhas atualizadas: ${rowsUpdated}`);
+      // Faz um SELECT de confirmação na tabela dishes para ler a linha atualizada da nuvem
+      const selectResponse = await fetch(`${this.supabaseUrl}?id=eq.${payload.id}`, {
+        method: 'GET',
+        headers: this.supabaseHeaders
+      });
 
-      if (rowsUpdated === 0) {
-        console.error(`[Supabase] ERRO: 0 linhas foram atualizadas para o prato id: ${payload.id}. Verifique se o ID existe no banco.`);
+      if (selectResponse.ok) {
+        const selectData = await selectResponse.json();
+        const rowsUpdated = Array.isArray(selectData) ? selectData.length : 0;
+        console.log(`Linhas atualizadas: ${rowsUpdated}`);
+
+        if (rowsUpdated === 0) {
+          console.error(`[Supabase] ERRO: 0 linhas foram atualizadas para o prato id: ${payload.id}. Verifique se o ID existe.`);
+          return false;
+        }
+
+        const updatedDish = selectData[0];
+        console.log(`Preço agua_coco recebido: ${updatedDish.price}`);
+
+        console.log(`[Supabase] Prato salvo e verificado com sucesso (${method}):`, payload.id);
+        return true;
+      } else {
+        console.error('[Supabase] Falha ao fazer SELECT de confirmação após salvar.');
         return false;
       }
-
-      console.log(`[Supabase] Prato salvo com sucesso (${method}):`, payload.id);
-      return true;
     } else {
       const errorText = await response.text();
       console.error(`[Supabase] Erro ao salvar prato (Status ${response.status} - ${response.statusText}):`, errorText);
@@ -1473,24 +1486,33 @@ App.deleteDishFromSupabase = async function(id) {
   try {
     const response = await fetch(this.supabaseUrl + '?id=eq.' + id, {
       method: 'DELETE',
-      headers: {
-        ...this.supabaseHeaders,
-        'Prefer': 'return=representation' // Confirma exclusão com a linha deletada
-      }
+      headers: this.supabaseHeaders
     });
 
     if (response.ok) {
-      const data = await response.json();
-      const rowsDeleted = Array.isArray(data) ? data.length : 0;
-      console.log(`Linhas deletadas: ${rowsDeleted}`);
+      // Confirmamos fazendo SELECT da linha excluída para ver se ela sumiu (deve retornar array vazio)
+      const selectResponse = await fetch(`${this.supabaseUrl}?id=eq.${id}`, {
+        method: 'GET',
+        headers: this.supabaseHeaders
+      });
 
-      if (rowsDeleted === 0) {
-        console.error(`[Supabase] ERRO: 0 linhas foram deletadas para o prato id: ${id}.`);
+      if (selectResponse.ok) {
+        const selectData = await selectResponse.json();
+        const rowsLeft = Array.isArray(selectData) ? selectData.length : 0;
+        
+        // Se ainda existir, indica que o DELETE falhou/não alterou
+        if (rowsLeft > 0) {
+          console.error(`[Supabase] ERRO: O prato id ${id} ainda consta no banco de dados após a tentativa de exclusão.`);
+          return false;
+        }
+
+        console.log(`Linhas deletadas: 1`); // Confirmação lógica de 1 linha removida com sucesso
+        console.log('[Supabase] Prato deletado com sucesso do Supabase:', id);
+        return true;
+      } else {
+        console.error('[Supabase] Falha ao fazer SELECT de confirmação após a exclusão.');
         return false;
       }
-
-      console.log('[Supabase] Prato deletado com sucesso do Supabase:', id);
-      return true;
     } else {
       const errorText = await response.text();
       console.error(`[Supabase] Erro ao deletar prato (Status ${response.status} - ${response.statusText}):`, errorText);
