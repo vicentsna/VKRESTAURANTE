@@ -1418,29 +1418,45 @@ App.fetchDishesFromSupabase = async function() {
 
 App.saveDishToSupabase = async function(dish, isEdit) {
   try {
-    // Mapeia reviewsCount (camelCase no JS) para reviewscount (minúscula no banco Postgres)
+    // Garante tipos corretos (ex: price como number) e mapeia reviewsCount -> reviewscount
     const payload = {
       id: dish.id,
       name: dish.name,
-      price: dish.price,
+      price: parseFloat(dish.price),
       category: dish.category,
-      image: dish.image,
+      image: dish.image || null,
       description: dish.description,
-      ingredients: dish.ingredients,
-      tag: dish.tag,
-      rating: dish.rating,
-      reviewscount: dish.reviewsCount
+      ingredients: Array.isArray(dish.ingredients) ? dish.ingredients : [],
+      tag: dish.tag || null,
+      rating: parseFloat(dish.rating || 5.0),
+      reviewscount: parseInt(dish.reviewsCount || 0)
     };
 
-    const url = isEdit ? `${this.supabaseUrl}?id=eq.${dish.id}` : this.supabaseUrl;
+    console.log(`Atualizando prato id: ${payload.id}`);
+    console.log('Payload:', { price: payload.price });
+
+    const url = isEdit ? `${this.supabaseUrl}?id=eq.${payload.id}` : this.supabaseUrl;
     const method = isEdit ? 'PATCH' : 'POST';
     const response = await fetch(url, {
       method: method,
-      headers: this.supabaseHeaders,
+      headers: {
+        ...this.supabaseHeaders,
+        'Prefer': 'return=representation' // Exige representação no corpo da resposta
+      },
       body: JSON.stringify(payload)
     });
+
     if (response.ok) {
-      console.log(`[Supabase] Prato salvo com sucesso (${method}):`, dish.id);
+      const data = await response.json();
+      const rowsUpdated = Array.isArray(data) ? data.length : 0;
+      console.log(`Linhas atualizadas: ${rowsUpdated}`);
+
+      if (rowsUpdated === 0) {
+        console.error(`[Supabase] ERRO: 0 linhas foram atualizadas para o prato id: ${payload.id}. Verifique se o ID existe no banco.`);
+        return false;
+      }
+
+      console.log(`[Supabase] Prato salvo com sucesso (${method}):`, payload.id);
       return true;
     } else {
       const errorText = await response.text();
@@ -1457,9 +1473,22 @@ App.deleteDishFromSupabase = async function(id) {
   try {
     const response = await fetch(this.supabaseUrl + '?id=eq.' + id, {
       method: 'DELETE',
-      headers: this.supabaseHeaders
+      headers: {
+        ...this.supabaseHeaders,
+        'Prefer': 'return=representation' // Confirma exclusão com a linha deletada
+      }
     });
+
     if (response.ok) {
+      const data = await response.json();
+      const rowsDeleted = Array.isArray(data) ? data.length : 0;
+      console.log(`Linhas deletadas: ${rowsDeleted}`);
+
+      if (rowsDeleted === 0) {
+        console.error(`[Supabase] ERRO: 0 linhas foram deletadas para o prato id: ${id}.`);
+        return false;
+      }
+
       console.log('[Supabase] Prato deletado com sucesso do Supabase:', id);
       return true;
     } else {
