@@ -606,7 +606,10 @@ const DEFAULT_DISHES = [
     ingredients: ['Polpa pura de graviola', 'Água gelada ou leite', 'Gelo'],
     tag: 'destaque',
     rating: 4.8,
-    reviewsCount: 14
+    reviewsCount: 14,
+    options: [
+      { name: 'Preparo', choices: ['Com Água', 'Com Leite'] }
+    ]
   },
   {
     id: 'cerveja_artesanal',
@@ -678,7 +681,10 @@ const DEFAULT_DISHES = [
     ingredients: ['Cachaça artesanal pernambucana', 'Limão fresco', 'Açúcar', 'Gelo'],
     tag: 'mais-pedido',
     rating: 4.8,
-    reviewsCount: 19
+    reviewsCount: 19,
+    options: [
+      { name: 'Fruta', choices: ['Limão', 'Maracujá', 'Caju', 'Manga'] }
+    ]
   },
   {
     id: 'refrigerante',
@@ -690,7 +696,10 @@ const DEFAULT_DISHES = [
     ingredients: ['Refrigerante gelado 350ml'],
     tag: '',
     rating: 4.3,
-    reviewsCount: 5
+    reviewsCount: 5,
+    options: [
+      { name: 'Marca', choices: ['Coca-Cola', 'Guaraná', 'Fanta', 'Sprite'] }
+    ]
   },
 
   // =============================================

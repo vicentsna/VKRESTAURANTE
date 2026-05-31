@@ -2947,3 +2947,67 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px var(--color-gold-glow);
 }
+
+/* ====================================================================
+   SISTEMA DE OPÇÕES E VARIAÇÕES DE PRODUTOS (PILLS TÁTEIS)
+   ==================================================================== */
+.detail-options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  padding: 1rem 0;
+  border-top: 1px dashed var(--border-color);
+  border-bottom: 1px dashed var(--border-color);
+  margin: 1.5rem 0;
+}
+
+.option-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.option-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--color-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.option-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 0.2rem;
+}
+
+.option-pill {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  border-radius: 30px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.option-pill:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.option-pill.active {
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+  background: rgba(229, 169, 26, 0.08);
+  box-shadow: 0 2px 8px rgba(229, 169, 26, 0.15);
+  transform: translateY(-1px);
+}
+

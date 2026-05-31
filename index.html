@@ -185,6 +185,11 @@
 
           <p id="detail-description" class="detail-description">Descrição completa do prato.</p>
 
+          <!-- Opções e Variações Interativas -->
+          <div id="detail-options-container" class="detail-options-container" style="display: none;">
+            <!-- Renderizado dinamicamente pelo JS -->
+          </div>
+
           <!-- Ingredientes -->
           <h3 class="detail-section-title">✨ Ingredientes Principais</h3>
           <div id="ingredients-list" class="ingredients-list">
@@ -388,6 +393,11 @@
                   <div class="form-group">
                     <label class="form-label" for="crud-dish-ingredients">Ingredientes Principais (Separados por vírgula)</label>
                     <input type="text" id="crud-dish-ingredients" class="form-input" placeholder="Ex: Carne de Sol, Queijo Coalho, Macaxeira Frita">
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="crud-dish-options">Opções / Variações (Ex: Sabor: Caju, Graviola | Tipo: Com Gás, Sem Gás)</label>
+                    <input type="text" id="crud-dish-options" class="form-input" placeholder="Ex: Sabor: Caju, Graviola | Tipo: Com Gás, Sem Gás">
                   </div>
 
                   <div class="form-group">

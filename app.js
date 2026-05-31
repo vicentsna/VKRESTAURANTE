@@ -525,16 +525,50 @@ const App = {
     document.getElementById('detail-rating-text').innerText = `${ratingVal} (${approvedComments.length} comentários)`;
     document.getElementById('detail-description').innerText = dish.description;
 
-    // Configuração do botão de Fazer Pedido via WhatsApp com acúmulo de pontos
+    // Renderiza Opções/Variações Interativas (Sabor, Marca, Tipo, etc.)
+    const optionsContainer = document.getElementById('detail-options-container');
+    optionsContainer.innerHTML = '';
+    optionsContainer.style.display = 'none';
+
+    if (dish.options && Array.isArray(dish.options) && dish.options.length > 0) {
+      optionsContainer.style.display = 'flex';
+      dish.options.forEach((opt, optIndex) => {
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'option-group';
+        groupDiv.dataset.optionIndex = optIndex;
+
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'option-title';
+        titleSpan.innerText = `${opt.name}:`;
+        groupDiv.appendChild(titleSpan);
+
+        const choicesDiv = document.createElement('div');
+        choicesDiv.className = 'option-choices';
+
+        opt.choices.forEach((choice, choiceIndex) => {
+          const pillButton = document.createElement('button');
+          pillButton.className = `option-pill ${choiceIndex === 0 ? 'active' : ''}`;
+          pillButton.innerText = choice;
+          pillButton.type = 'button';
+
+          pillButton.addEventListener('click', () => {
+            choicesDiv.querySelectorAll('.option-pill').forEach(p => p.classList.remove('active'));
+            pillButton.classList.add('active');
+            this.updateWhatsAppOrderLink(dish);
+          });
+
+          choicesDiv.appendChild(pillButton);
+        });
+
+        groupDiv.appendChild(choicesDiv);
+        optionsContainer.appendChild(groupDiv);
+      });
+    }
+
+    // Configuração do botão de Fazer Pedido via WhatsApp com acúmulo de pontos e opções
     const orderBtn = document.getElementById('btn-order-whats');
     if (orderBtn) {
-      const orderMsg = encodeURIComponent(
-        `Olá! Gostaria de fazer o pedido do prato:\n\n` +
-        `*${dish.name}*\n` +
-        `💰 Preço: R$ ${dish.price.toFixed(2).replace('.', ',')}\n\n` +
-        `Estou na mesa do VK Restaurante.`
-      );
-      orderBtn.href = `https://api.whatsapp.com/send?phone=558198069998&text=${orderMsg}`;
+      this.updateWhatsAppOrderLink(dish);
       
       orderBtn.onclick = () => {
         const currentCustomer = (typeof LoyaltySystem !== 'undefined') ? LoyaltySystem.getCustomer() : null;
@@ -979,6 +1013,9 @@ const App = {
     // Selo / Tag
     document.getElementById('crud-dish-tag').value = dish.tag || '';
 
+    // Opções / Variações
+    document.getElementById('crud-dish-options').value = this.stringifyDishOptions(dish.options);
+
     document.getElementById('btn-cancel-dish-edit').style.display = 'inline-block';
     
     // Rola até o formulário no celular
@@ -994,6 +1031,7 @@ const App = {
     const description = document.getElementById('crud-dish-desc').value.trim();
     const ingInput = document.getElementById('crud-dish-ingredients').value.trim();
     const tag = document.getElementById('crud-dish-tag').value;
+    const optionsInput = document.getElementById('crud-dish-options').value.trim();
 
     if (!name || isNaN(price) || !description) {
       this.showToast('Por favor, preencha todos os campos obrigatórios!', 'error');
@@ -1001,6 +1039,7 @@ const App = {
     }
 
     const ingredients = ingInput ? ingInput.split(',').map(i => i.trim()).filter(i => i !== '') : [];
+    const options = this.parseDishOptions(optionsInput);
     const isEdit = !!this.state.editingDishId;
 
     let dishData = null;
@@ -1021,7 +1060,8 @@ const App = {
         ingredients: ingredients,
         tag: tag || null,
         rating: parseFloat(rating),
-        reviewsCount: parseInt(reviewsCount)
+        reviewsCount: parseInt(reviewsCount),
+        options: options
       };
     } else {
       // MODO CRIAÇÃO NOVO PRATO
@@ -1036,7 +1076,8 @@ const App = {
         ingredients: ingredients,
         tag: tag || null,
         rating: 5.0,
-        reviewsCount: 0
+        reviewsCount: 0,
+        options: options
       };
     }
 
@@ -1094,6 +1135,7 @@ const App = {
     this.state.editingDishId = null;
     document.getElementById('panel-crud-title').innerText = 'Adicionar Prato';
     document.getElementById('dish-crud-form').reset();
+    document.getElementById('crud-dish-options').value = '';
     document.getElementById('btn-cancel-dish-edit').style.display = 'none';
   },
 
@@ -1432,7 +1474,8 @@ App.fetchDishesFromSupabase = async function() {
             id: preservedId, // Garante que o ID original seja preservado
             price: parseFloat(d.price !== undefined ? d.price : (d.Price !== undefined ? d.Price : 0)),
             ingredients: Array.isArray(d.ingredients) ? d.ingredients : [],
-            reviewsCount: d.reviewscount !== undefined ? parseInt(d.reviewscount) : parseInt(d.reviewsCount || 0)
+            reviewsCount: d.reviewscount !== undefined ? parseInt(d.reviewscount) : parseInt(d.reviewsCount || 0),
+            options: Array.isArray(d.options) ? d.options : []
           };
         });
 
@@ -1474,7 +1517,8 @@ App.saveDishToSupabase = async function(dish, isEdit) {
       ingredients: Array.isArray(dish.ingredients) ? dish.ingredients : [],
       tag: dish.tag || null,
       rating: parseFloat(dish.rating || 5.0),
-      reviewscount: parseInt(dish.reviewsCount || 0)
+      reviewscount: parseInt(dish.reviewsCount || 0),
+      options: Array.isArray(dish.options) ? dish.options : []
     };
 
     const url = isEdit ? `${this.supabaseUrl}?id=eq.${payload.id}` : this.supabaseUrl;
@@ -1581,3 +1625,53 @@ App.deleteDishFromSupabase = async function(id) {
     return false;
   }
 };
+
+/* ====================================================================
+   HELPERS E SISTEMAS PARA OPÇÕES E VARIAÇÕES DE PRODUTOS
+   ==================================================================== */
+
+// Converte string amigável (Sabor: Caju, Graviola | Tipo: Com Gás) em Array de Objetos JSON
+App.parseDishOptions = function(str) {
+  if (!str || !str.trim()) return [];
+  return str.split('|').map(optStr => {
+    const parts = optStr.split(':');
+    if (parts.length < 2) return null;
+    const name = parts[0].trim();
+    const choices = parts[1].split(',').map(c => c.trim()).filter(Boolean);
+    if (!name || choices.length === 0) return null;
+    return { name, choices };
+  }).filter(Boolean);
+};
+
+// Converte Array de Objetos JSON em string amigável de fácil edição
+App.stringifyDishOptions = function(options) {
+  if (!options || !Array.isArray(options) || options.length === 0) return '';
+  return options.map(opt => `${opt.name}: ${opt.choices.join(', ')}`).join(' | ');
+};
+
+// Atualiza dinamicamente a mensagem e link do WhatsApp com base nas opções ativas/selecionadas
+App.updateWhatsAppOrderLink = function(dish) {
+  const orderBtn = document.getElementById('btn-order-whats');
+  if (!orderBtn) return;
+
+  const selectedChoices = [];
+  const groups = document.querySelectorAll('.option-group');
+  groups.forEach(group => {
+    const title = group.querySelector('.option-title').innerText.replace(':', '').trim();
+    const activePill = group.querySelector('.option-pill.active');
+    if (activePill) {
+      selectedChoices.push(`${title}: ${activePill.innerText.trim()}`);
+    }
+  });
+
+  const choicesSuffix = selectedChoices.length > 0 ? ` (${selectedChoices.join(', ')})` : '';
+
+  const orderMsg = encodeURIComponent(
+    `Olá! Gostaria de fazer o pedido do prato:\n\n` +
+    `*${dish.name}*${choicesSuffix}\n` +
+    `💰 Preço: R$ ${dish.price.toFixed(2).replace('.', ',')}\n\n` +
+    `Estou na mesa do VK Restaurante.`
+  );
+  orderBtn.href = `https://api.whatsapp.com/send?phone=558198069998&text=${orderMsg}`;
+};
+
