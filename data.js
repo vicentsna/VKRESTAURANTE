@@ -2,18 +2,18 @@
 // Contém categorias, pratos e comentários iniciais (aprovados e pendentes)
 
 const DEFAULT_CATEGORIES = [
-  { id: 'destaques', name: 'Destaques 🌟' },
-  { id: 'executivos', name: 'Executivos 🍽️' },
-  { id: 'carnes', name: 'Carnes Bovinas 🥩' },
-  { id: 'suinos', name: 'Carnes Suínas 🐷' },
-  { id: 'aves', name: 'Aves 🍗' },
-  { id: 'frutos-do-mar', name: 'Frutos do Mar 🦐' },
-  { id: 'saladas', name: 'Saladas 🥗' },
-  { id: 'petiscos', name: 'Petiscos 🧀' },
-  { id: 'pratos', name: 'Pratos Principais 🍲' },
-  { id: 'bebidas', name: 'Bebidas 🍻' },
-  { id: 'sobremesas', name: 'Sobremesas 🍮' },
-  { id: 'promocoes', name: 'Promoções 🏷️' }
+  { id: 'destaques', name: 'Destaques' },
+  { id: 'executivos', name: 'Executivos' },
+  { id: 'carnes', name: 'Carnes Bovinas' },
+  { id: 'suinos', name: 'Carnes Suínas' },
+  { id: 'aves', name: 'Aves' },
+  { id: 'frutos-do-mar', name: 'Frutos do Mar' },
+  { id: 'saladas', name: 'Saladas' },
+  { id: 'petiscos', name: 'Petiscos' },
+  { id: 'pratos', name: 'Pratos Principais' },
+  { id: 'bebidas', name: 'Bebidas' },
+  { id: 'sobremesas', name: 'Sobremesas' },
+  { id: 'promocoes', name: 'Promoções' }
 ];
 
 const DEFAULT_DISHES = [
@@ -810,81 +810,7 @@ const DEFAULT_DISHES = [
   }
 ];
 
-const DEFAULT_COMMENTS = [
-  {
-    id: 1,
-    dishId: 'feijoada',
-    name: 'Maria das Dores',
-    rating: 5,
-    comment: 'Comida com gostinho de vó mesmo! A feijoada veio super quentinha na panela de barro, e a couve estava no ponto perfeito. Recomendo muito!',
-    status: 'approved',
-    date: '28/05/2026'
-  },
-  {
-    id: 2,
-    dishId: 'feijoada',
-    name: 'João Cabral',
-    rating: 4,
-    comment: 'Muito boa feijoada, tempero excelente. Só achei que a porção de farofa podia vir um tiquinho maior, mas estava divina!',
-    status: 'approved',
-    date: '27/05/2026'
-  },
-  {
-    id: 3,
-    dishId: 'galeto',
-    name: 'Severino Neto',
-    rating: 5,
-    comment: 'Esse galeto é uma obra de arte! Suculento por dentro e com a pele super crocante. As batatas fritas secas e crocantes. Alimenta três pessoas tranquilamente.',
-    status: 'approved',
-    date: '28/05/2026'
-  },
-  {
-    id: 4,
-    dishId: 'camarao',
-    name: 'Clara Cavalcanti',
-    rating: 5,
-    comment: 'O melhor camarão especial que já comi! Molho de queijo super cremoso e generoso na quantidade. Vale cada centavo.',
-    status: 'approved',
-    date: '26/05/2026'
-  },
-  {
-    id: 5,
-    dishId: 'cartola',
-    name: 'Antônio de Souza',
-    rating: 5,
-    comment: 'A cartola daqui é espetacular! O queijo coalho derretido na chapa com a banana frita é a combinação perfeita dos céus de Pernambuco.',
-    status: 'approved',
-    date: '28/05/2026'
-  },
-  // Comentários pendentes de aprovação pelo Administrador para demonstrar a funcionalidade
-  {
-    id: 6,
-    dishId: 'feijoada',
-    name: 'Carlos Albuquerque',
-    rating: 5,
-    comment: 'Simplesmente fantástica! O sabor regional é inconfundível. Atendimento super rápido.',
-    status: 'pending',
-    date: '28/05/2026'
-  },
-  {
-    id: 7,
-    dishId: 'cupim',
-    name: 'Rafaela Santos',
-    rating: 4,
-    comment: 'O cupim desmancha na boca! Muito gostoso, mas achei que demorou uns minutinhos para servir. De resto, maravilhoso!',
-    status: 'pending',
-    date: '28/05/2026'
-  },
-  {
-    id: 8,
-    dishId: 'galeto',
-    name: 'Marcelo Vieira',
-    rating: 5,
-    comment: 'Sem dúvidas o melhor galeto da região. Cerveja trincando de gelada para acompanhar.',
-    status: 'pending',
-    date: '28/05/2026'
-  }
-];
+const DEFAULT_COMMENTS = [];
 
 // Exporta para uso no app.js
 if (typeof module !== 'undefined' && module.exports) {

@@ -67,7 +67,7 @@ const App = {
   // Carrega os dados persistidos ou semeia com dados padrão
   loadState() {
     // Versão do menu - incrementar ao alterar data.js para forçar refresh
-    const MENU_VERSION = '2.0';
+    const MENU_VERSION = '3.0';
     const savedVersion = localStorage.getItem('vk_menu_version');
 
     // Se versão mudou, limpa dados antigos
@@ -146,14 +146,14 @@ const App = {
     document.getElementById('admin-login-form').addEventListener('submit', (e) => {
       e.preventDefault();
       const password = document.getElementById('admin-password').value;
-      if (password === 'admin123') {
+      if (password === 'vicente123') {
         this.state.isAdmin = true;
         sessionStorage.setItem('vk_is_admin', 'true');
         this.showToast('Acesso administrativo concedido!', 'success');
         document.getElementById('admin-password').value = '';
         this.renderAdminView();
       } else {
-        this.showToast('Senha incorreta! Use "admin123".', 'error');
+        this.showToast('Senha incorreta!', 'error');
       }
     });
 
@@ -1364,12 +1364,6 @@ App.renderPremiumSections = function() {
   const highlightsContainer = document.getElementById('highlights-container');
   if (highlightsContainer && typeof CampaignSystem !== 'undefined') {
     highlightsContainer.innerHTML = CampaignSystem.renderHighlightsSection(this.state.dishes);
-  }
-
-  // 2. Ranking de Pratos
-  const rankingContainer = document.getElementById('ranking-container');
-  if (rankingContainer && typeof RankingSystem !== 'undefined') {
-    rankingContainer.innerHTML = RankingSystem.renderTrendingSection(this.state.dishes);
   }
 };
 
