@@ -26,7 +26,13 @@
   <!-- Favicon Mock -->
   <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌵</text></svg>">
 
-  <!-- Link de Estilos -->
+  <!-- Preconnect to Google Fonts and Supabase API -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://xzmdgnvrhrvzjfltvaaf.supabase.co">
+
+  <!-- Link de Estilos e Fontes -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -38,7 +44,7 @@
       <div class="header-container">
         <a href="#" class="header-logo">
           <div class="logo-icon">
-            <img src="assets/logo_vk.png" alt="VK Restaurante Logo" style="width: 36px; height: 36px; object-fit: contain;">
+            <img src="assets/logo_vk.png" alt="VK Restaurante Logo" width="36" height="36" style="width: 36px; height: 36px; object-fit: contain;" loading="eager">
           </div>
           <h1 class="logo-text">VK <span>Restaurante</span></h1>
         </a>
@@ -56,7 +62,7 @@
 
     <!-- Banner Hero & Boas-Vindas -->
     <section class="hero-section">
-      <div id="hero-banner" class="hero-banner"></div>
+      <div id="hero-banner" class="hero-banner" style="background-image: url('assets/vk_banner_hero.png');"></div>
       <div class="hero-content">
         <div class="welcome-card woodcut-border-double">
           <div class="welcome-grid">
@@ -68,7 +74,7 @@
             
             <!-- Desenho Cordel Decorativo Lateral -->
             <div class="welcome-cordel-graphic">
-              <img src="assets/logo_vk.png" alt="VK Restaurante" style="width: 100%; max-width: 150px; height: auto; filter: drop-shadow(0 0 10px rgba(229, 169, 26, 0.3));">
+              <img src="assets/logo_vk.png" alt="VK Restaurante" width="150" height="150" style="width: 100%; max-width: 150px; height: auto; filter: drop-shadow(0 0 10px rgba(229, 169, 26, 0.3));" loading="lazy">
             </div>
           </div>
         </div>
